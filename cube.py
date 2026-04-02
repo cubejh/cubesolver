@@ -31,3 +31,12 @@ class Cube:
             CornerPiece("U", 0), CornerPiece("V", 0), CornerPiece("W", 0), CornerPiece("X", 0),
         ]
         return Cube(edges, corners)
+    
+    def printcube(self):
+        print("Edges:")
+        for e in self.edgepieces:
+            print(f"{e.name}, orientation={e.orientation}")
+
+        print("\nCorners:")
+        for c in self.cornerpieces:
+            print(f"{c.name}, orientation={c.orientation}")

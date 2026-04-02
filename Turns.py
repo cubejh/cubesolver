@@ -1,18 +1,19 @@
+# fix orientation
 class CubeTurn:
 
     @staticmethod
     def Turn_layer(pieces, indices, turns):
         i0, i1, i2, i3 = indices
 
-        if turns == 0:
+        if turns == 0: #clockwise
             pieces[i0], pieces[i1], pieces[i2], pieces[i3] = \
             pieces[i3], pieces[i0], pieces[i1], pieces[i2]
 
-        elif turns == 1:
+        elif turns == 1: # counter clockwise
             pieces[i0], pieces[i1], pieces[i2], pieces[i3] = \
             pieces[i1], pieces[i2], pieces[i3], pieces[i0]
 
-        elif turns == 2:
+        elif turns == 2: #double
             pieces[i0], pieces[i1], pieces[i2], pieces[i3] = \
             pieces[i2], pieces[i3], pieces[i0], pieces[i1]
 
