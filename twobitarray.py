@@ -1,17 +1,15 @@
-# bitarray_2bit.py
-
 class BitArray2:
     def __init__(self, size):
         """
-        初始化 2-bit array
-        每個元素可存 0~3
+        initial 2-bit array
+        every bit store 0~3
         """
         if size <= 0:
             raise ValueError("Size must be positive")
 
         self.size = size
         self.byte_size = (size + 3) // 4  # 1 byte = 4 elements
-        self.data = bytearray(self.byte_size)
+        self.data = bytearray([0xFF] * self.byte_size)
 
     def _check_index(self, i):
         if i < 0 or i >= self.size:
@@ -19,7 +17,7 @@ class BitArray2:
 
     def set(self, i, value):
         """
-        設定第 i 個值 (0~3)
+        set i val
         """
         self._check_index(i)
 
@@ -29,15 +27,13 @@ class BitArray2:
         byte_index = i // 4
         offset = (i % 4) * 2
 
-        # 清除原本的 2 bits
         self.data[byte_index] &= ~(0b11 << offset)
 
-        # 設定新值
         self.data[byte_index] |= (value << offset)
 
     def get(self, i):
         """
-        取得第 i 個值 (0~3)
+        get ith val
         """
         self._check_index(i)
 
@@ -47,8 +43,8 @@ class BitArray2:
         return (self.data[byte_index] >> offset) & 0b11
 
     def clear(self, i):
-        """設為 0"""
-        self.set(i, 0)
+        """set to 3(not check)"""
+        self.set(i, 3)
 
     def memory_usage(self):
         return len(self.data)
@@ -56,10 +52,8 @@ class BitArray2:
     def __len__(self):
         return self.size
 
+"""
 
-# =========================
-# 使用範例
-# =========================
 if __name__ == "__main__":
     N = 2217093120  # 約 22 億個「2-bit 元素」
 
@@ -83,3 +77,4 @@ if __name__ == "__main__":
     arr.set(789, 3)
 
     print(arr.get(123), arr.get(456), arr.get(789))
+"""
