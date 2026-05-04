@@ -40,9 +40,10 @@ def parse_moves(s: str) -> list[Move]:
     return moves
 
 """
+example:
 s1 = "R' L B' D2 L2 B2 L' D R' L2 F2 B2 D R2 U' D' L2 F2 D' R2"
 print("\ntest:")
 for m in parse_moves(s1):
     print(m.face, m.amount)
-    #m.apply(cube)
+    m.apply(cube)
 """
