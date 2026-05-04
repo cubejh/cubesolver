@@ -1,8 +1,8 @@
 import os
 import time
-from cube import Cube
-from notation import parse_moves  # 假設你的 Move 和 parse_moves 在 notation.py
-from p1_table import TableManager
+from core.cube import Cube
+from core.notation import parse_moves  # 假設你的 Move 和 parse_moves 在 notation.py
+from tables.p1_table import TableManager
 
 def test_with_scramble():
     print("=== Phase 1 Distance Test with Scramble String ===")
