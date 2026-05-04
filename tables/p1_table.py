@@ -1,9 +1,9 @@
 import os
 from collections import deque
 import time
-from cube import Cube
-from move_table_manager import MoveTableManager
-from distance_table import DistanceTable
+from core.cube import Cube
+from tables.move_table_manager import MoveTableManager
+from tables.distance_table import DistanceTable
 
 class TableManager:
     def __init__(self, folder="tables"):

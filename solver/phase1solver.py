@@ -1,5 +1,5 @@
 import time
-from cube import Cube
+from core.cube import Cube
 
 class Phase1Solver:
     def __init__(self, table_manager):
@@ -75,8 +75,8 @@ class Phase1Solver:
         return " ".join(res)
 
 if __name__ == "__main__":
-    from p1_table import TableManager
-    from notation import parse_moves
+    from tables.p1_table import TableManager
+    from core.notation import parse_moves
     import os
 
     tm = TableManager(folder="cube_data")

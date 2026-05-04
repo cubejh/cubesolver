@@ -2,9 +2,9 @@ import os
 from collections import deque
 from array import array
 import time
-from cube import Cube
-from Turns import CubeTurn
-from distance_table import DistanceTable
+from core.cube import Cube
+from core.Turns import CubeTurn
+from tables.distance_table import DistanceTable
 
 class MoveTableManager:
     def __init__(self, folder="tables"):
