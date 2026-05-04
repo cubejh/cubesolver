@@ -1,4 +1,5 @@
 from math import comb
+import re
 
 class EdgePiece:
     def __init__(self, name, orientation):
@@ -81,3 +82,61 @@ class Cube:
     
     def get_twist_slice_val(self):
         return self.get_twist_number() + (self.get_slice_number()*(3**7))
+    
+    @classmethod
+    def from_stringA(cls, edge_str, corner_str):
+        """
+        """
+        
+        def extract_tokens(s):
+            return re.findall(r"([A-Za-z])(\d+)", s)
+
+        edge_matches = extract_tokens(edge_str)
+        corner_matches = extract_tokens(corner_str)
+
+        if len(edge_matches) != 12:
+            raise ValueError(f"Edges error: expected 12, found {len(edge_matches)} in '{edge_str}'")
+        if len(corner_matches) != 8:
+            raise ValueError(f"Corners error: expected 8, found {len(corner_matches)} in '{corner_str}'")
+
+        valid_edge_names = set("ABCDLJTRUVWX")
+        valid_corner_names = set("ABCDUVWX")
+
+        new_edges = []
+        eo_sum = 0
+        for name, ori_str in edge_matches:
+            name = name.upper()
+            ori = int(ori_str)
+
+            if name not in valid_edge_names:
+                raise ValueError(f"Edge '{name}' is duplicate or invalid.")
+            valid_edge_names.remove(name)
+
+            if ori not in [0, 1]:
+                raise ValueError(f"Edge '{name}' has invalid orientation: {ori}")
+            eo_sum += ori
+            new_edges.append(EdgePiece(name, ori))
+
+        new_corners = []
+        co_sum = 0
+        for name, ori_str in corner_matches:
+            name = name.upper()
+            ori = int(ori_str)
+
+            if name not in valid_corner_names:
+                raise ValueError(f"Corner '{name}' is duplicate or invalid.")
+            valid_corner_names.remove(name)
+
+            if ori not in [0, 1, 2]:
+                raise ValueError(f"Corner '{name}' has invalid orientation: {ori}")
+            
+            co_sum += ori
+            new_corners.append(CornerPiece(name, ori))
+
+        if eo_sum % 2 != 0:
+            raise ValueError(f"Illegal Edges: EO sum ({eo_sum}) must be even.")
+        if co_sum % 3 != 0:
+            raise ValueError(f"Illegal Corners: CO sum ({co_sum}) must be multiple of 3.")
+
+        print("Validation successful: Cube state is mathematically legal.")
+        return cls(new_edges, new_corners)

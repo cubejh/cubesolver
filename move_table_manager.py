@@ -1,6 +1,7 @@
 import os
 from collections import deque
 from array import array
+import time
 from cube import Cube
 from Turns import CubeTurn
 from distance_table import DistanceTable
@@ -31,11 +32,18 @@ class MoveTableManager:
             return fs_move, ts_move
         else:
             print("Move tables not found. Starting generation (this may take a few minutes)...")
+            
+            build_start = time.time()
+            
             fs_move = self._build_move_table(self.FS_SIZE, "get_flip_slice_val")
             self._save_move_table(fs_move, fs_path)
             
             ts_move = self._build_move_table(self.TS_SIZE, "get_twist_slice_val")
             self._save_move_table(ts_move, ts_path)
+
+            build_end = time.time()
+            print(f"move tables built and saved in {build_end - build_start:.2f} seconds.")
+            
             return fs_move, ts_move
 
     def _build_move_table(self, size, val_func_name):

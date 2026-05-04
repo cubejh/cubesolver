@@ -1,5 +1,6 @@
 import os
 from collections import deque
+import time
 from cube import Cube
 from move_table_manager import MoveTableManager
 from distance_table import DistanceTable
@@ -33,6 +34,7 @@ class TableManager:
             self.ts_table = DistanceTable.from_file(ts_path)
         else:
             print("Pruning tables not found. Building with BFS...")
+            build_start = time.time()
             start_cube = Cube.newcube()
             start_fs = start_cube.get_flip_slice_val()
             start_ts = start_cube.get_twist_slice_val()
@@ -42,6 +44,8 @@ class TableManager:
             
             self._build_pruning_table(self.ts_table, self.ts_move, start_ts, "Twist-Slice")
             self.ts_table.to_file(ts_path)
+            build_end = time.time()
+            print(f"Pruning tables built and saved in {build_end - build_start:.2f} seconds.")
             print("Pruning tables built and saved successfully.")
 
     def _build_pruning_table(self, pruning_table, move_table, start_val, name):

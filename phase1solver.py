@@ -4,7 +4,7 @@ from cube import Cube
 class Phase1Solver:
     def __init__(self, table_manager):
         self.tm = table_manager
-        # 這裡現在可以正確讀到 self.tm.moves 了
+
         self.move_list = self.tm.moves 
         self.num_moves = len(self.move_list)
         
@@ -79,16 +79,14 @@ if __name__ == "__main__":
     from notation import parse_moves
     import os
 
-    # 確保資料夾存在
     tm = TableManager(folder="cube_data")
     solver = Phase1Solver(tm)
 
     cube = Cube.newcube()
-    # 測試一個 10 步左右的打亂
     scramble = "R' U' F L2 F' R2 B U2 B R2 B2 D2 R B' F2 D U B D2 L U F R' U' F U2 R U2 R" 
     print(f"Scrambling with: {scramble}")
     for m in parse_moves(scramble):
         m.apply(cube)
 
-    # 開始求解
+    cube2 = Cube.from_stringA("R1B1L0A1X0D1V1C1W0T0U0J0", "X0D0V0A2C2B1W1U0")
     solver.solve(cube)
