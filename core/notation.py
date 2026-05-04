@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from Turns import CubeTurn
+from core.Turns import CubeTurn
 import re
 
 @dataclass

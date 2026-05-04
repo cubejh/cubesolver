@@ -1,8 +1,27 @@
 import os
 import time
 from core.cube import Cube
-from core.notation import parse_moves  # 假設你的 Move 和 parse_moves 在 notation.py
+from core.notation import parse_moves 
 from tables.p1_table import TableManager
+from solver.phase1solver import Phase1Solver
+
+def test_with_phase1solver(scramble):
+    tm = TableManager(folder="cube_data")
+    solver = Phase1Solver(tm)
+
+    cube = Cube.newcube()
+    print(f"Scrambling with: {scramble}")
+    for m in parse_moves(scramble):
+        m.apply(cube)
+    solver.solve(cube)
+
+    edge_string = "R1B1L0A1X0D1V1C1W0T0U0J0"
+    corner_string = "X0D0V0A2C2B1W1U0"
+    print(f"edge_string: {edge_string}")
+    print(f"corner_string: {corner_string}")
+    cube2 = Cube.from_stringA(edge_string, corner_string)
+    solver.solve(cube2)
+
 
 def test_with_scramble():
     print("=== Phase 1 Distance Test with Scramble String ===")
@@ -11,24 +30,7 @@ def test_with_scramble():
     start_time = time.time()
     tm = TableManager(folder="cube_data")
     print(f"System initialized in {time.time() - start_time:.2f}s")
-
-    # 2. 準備方塊與打亂字串
-    cube = Cube.newcube()
-    scramble_str = "R' L B' D2 L2 B2 L' D R' L2 F2 B2 D R2 U' D' L2 F2 D' R2"
     
-    print(f"\n[Scramble]: {scramble_str}")
-    
-    # 3. 解析並執行動作
-    moves = parse_moves(scramble_str)
-    for m in moves:
-        m.apply(cube)
-    
-    # 4. 獲取距離
-    dist = tm.get_distance(cube)
-    print(f"\n[Result] Distance to Phase 2: {dist} moves")
-    
-    # 5. 驗證是否能回到 0 (手動執行一個反向測試)
-    # 這裡我們用一個簡單的字串來測試還原邏輯
     print("\n--- Verification: Simple Move & Undo ---")
     test_cube = Cube.newcube()
     test_moves = parse_moves("U R F'")
@@ -38,8 +40,6 @@ def test_with_scramble():
         m.apply(test_cube)
     print(f"Distance: {tm.get_distance(test_cube)}")
 
-    # 這裡示範如何手動反向旋轉
-    # U R F' 的反向是 F R' U'
     undo_moves = parse_moves("F R' U'")
     print("Applying Undo moves (F R' U')...")
     for m in undo_moves:
@@ -54,5 +54,6 @@ def test_with_scramble():
         print("\n❌ Verification FAILED!")
 
 if __name__ == "__main__":
-    # 如果你更換了 DistanceTable 邏輯，請記得先刪除舊的 .bin 檔案再執行
     test_with_scramble()
+    print("===================")
+    test_with_phase1solver("R' U' F R' F' L2 D2 F L2 U2 F' U2 R2 B' D2 F U R' D L' B' D U' R' U' F")

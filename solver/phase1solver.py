@@ -19,7 +19,7 @@ class Phase1Solver:
         print(f"Initial Phase 1 Distance: {initial_h}")
         
         if initial_h == 0:
-            print("Cube is already in Phase 2 (DR) state.")
+            print("Cube is already in DR state.")
             return ""
 
         print("Searching for Phase 1 solution...")
@@ -27,7 +27,6 @@ class Phase1Solver:
         
         for limit in range(initial_h, max_depth + 1):
             self.path = []
-            # last_face_idx 設為 -10 避免與 0~5 衝突
             if self._dfs(start_fs, start_ts, 0, limit, -10):
                 elapsed = time.time() - start_time
                 solution = self._format_path(self.path)
@@ -73,20 +72,3 @@ class Phase1Solver:
             elif amount == 2: suffix = "2"
             res.append(f"{face}{suffix}")
         return " ".join(res)
-
-if __name__ == "__main__":
-    from tables.p1_table import TableManager
-    from core.notation import parse_moves
-    import os
-
-    tm = TableManager(folder="cube_data")
-    solver = Phase1Solver(tm)
-
-    cube = Cube.newcube()
-    scramble = "R' U' F L2 F' R2 B U2 B R2 B2 D2 R B' F2 D U B D2 L U F R' U' F U2 R U2 R" 
-    print(f"Scrambling with: {scramble}")
-    for m in parse_moves(scramble):
-        m.apply(cube)
-
-    cube2 = Cube.from_stringA("R1B1L0A1X0D1V1C1W0T0U0J0", "X0D0V0A2C2B1W1U0")
-    solver.solve(cube)
