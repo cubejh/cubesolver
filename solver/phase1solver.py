@@ -25,7 +25,7 @@ class Phase1Solver:
             self.path = []
             if self._dfs(start_fs, start_ts, 0, limit, -10):
                 solution = self._format_path(self.path)
-                print(f"Found Solution at depth {limit} : {solution}")
+                print(f"Found DR Solution at depth {limit} : {solution}")
                 return solution
         print("No solution found.")
         return None
