@@ -31,7 +31,6 @@ class MoveTableManagerP2:
         self.folder = folder
         # 8! * 4! = 967,680
         self.P2_SIZE = 40320 * 24
-        # Phase 2 限制移動集
         self.moves = [
             ('U', 0), ('U', 1), ('U', 2),
             ('D', 0), ('D', 1), ('D', 2),

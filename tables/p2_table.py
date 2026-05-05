@@ -2,7 +2,7 @@ import os
 from collections import deque
 import time
 from core.cube import Cube
-from tables.move_table_manager_p2 import MoveTableManagerP2  # 假設你存為此檔名
+from tables.move_table_manager_p2 import MoveTableManagerP2 
 from tables.distance_table import DistanceTable
 
 class TableManagerP2:
@@ -11,7 +11,6 @@ class TableManagerP2:
         # 8! * 4! = 40320 * 24 = 967,680
         self.P2_SIZE = 40320 * 24
         
-        # Phase 2 只有 10 種移動
         self.moves = [
             ('U', 0), ('U', 1), ('U', 2),
             ('D', 0), ('D', 1), ('D', 2),
@@ -41,7 +40,6 @@ class TableManagerP2:
             print("--- Starting Phase 2 Pruning Table Generation ---")
             total_start = time.time()
             
-            # 定義起點 (Solved Cube)
             start_cube = Cube.newcube()
             start_cp_mp = start_cube.get_cp_mp_val()
             start_ep_mp = start_cube.get_ep_mp_val()
@@ -70,7 +68,7 @@ class TableManagerP2:
             print(f"{'='*50}")
 
     def _build_pruning_table(self, pruning_table, move_table, start_val):
-        """BFS 邏輯，使用 Phase 2 的 10 種移動"""
+        """BFS"""
         pruning_table.set(start_val, 0)
         queue = deque([start_val])
         visited_count = 1
@@ -80,7 +78,6 @@ class TableManagerP2:
             curr_dist = pruning_table.get(curr_val)
             next_dist = curr_dist + 1
 
-            # 使用 Phase 2 的移動數 (10)
             base_idx = curr_val * self.num_moves
             for move_idx in range(self.num_moves):
                 child_val = move_table[base_idx + move_idx]
@@ -93,7 +90,8 @@ class TableManagerP2:
         return visited_count
 
     def get_distance(self, cube):
-        """返回 Phase 2 的啟發式距離"""
+        """
+        """
         cp_mp_val = cube.get_cp_mp_val()
         ep_mp_val = cube.get_ep_mp_val()
         return max(self.cp_mp_table.get(cp_mp_val), self.ep_mp_table.get(ep_mp_val))

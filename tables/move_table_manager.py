@@ -90,7 +90,6 @@ class MoveTableManager:
             end = total_size if i == cpu_count - 1 else (i + 1) * chunk_size
             tasks.append((start, end, self.num_moves, self.moves))
 
-        # 使用 mp.Pool 進行平行處理
         with mp.Pool(processes=cpu_count) as pool:
             results = pool.starmap(worker_func, tasks)
 
