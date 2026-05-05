@@ -1,4 +1,5 @@
 from math import comb
+import math
 import re
 
 class EdgePiece:
@@ -40,6 +41,126 @@ class Cube:
         ]
         return Cube(edges, corners)
     
+    @staticmethod
+    def from_fs_val(val):
+        c = Cube.newcube()
+        c.set_flip(val % 2048)
+        c.set_slice(val // 2048)
+        return c
+
+    @staticmethod
+    def from_ts_val(val):
+        c = Cube.newcube()
+        c.set_twist(val % 2187)
+        c.set_slice(val // 2187)
+        return c
+    
+    @staticmethod
+    def get_rank(perm):
+        rank = 0
+        for i in range(len(perm)):
+            count = 0
+            for j in range(i + 1, len(perm)):
+                if perm[j] < perm[i]: count += 1
+            rank += count * math.factorial(len(perm) - 1 - i)
+        return rank
+
+    @staticmethod
+    def set_rank(rank, n):
+        items = list(range(n))
+        res = []
+        for i in range(n - 1, -1, -1):
+            f = math.factorial(i)
+            idx = rank // f
+            rank %= f
+            res.append(items.pop(idx))
+        return res
+
+    # --- Phase 2 逆轉換 (用於建表) ---
+    def set_cp_mp(self, val):
+        cp_rank = val // 24
+        mp_rank = val % 24
+        
+        # 1. 處理角塊排列 (CP)
+        cp_perm = self.set_rank(cp_rank, 8)
+        names = ["A","B","C","D","U","V","W","X"]
+        for i in range(8):
+            self.cornerpieces[i].name = names[cp_perm[i]]
+            self.cornerpieces[i].orientation = 0 # Phase 2 預設方向已好
+
+        # 2. 處理中間層稜塊排列 (MP)
+        mp_perm = self.set_rank(mp_rank, 4)
+        mp_names = ["L","J","T","R"]
+        # 先清空稜塊
+        for e in self.edgepieces: e.name = ""
+        # 放回中間層 (8,9,10,11 號位置是 Phase 1 之後 Slice 所在的位子)
+        for i, pos in enumerate([4, 5, 6, 7]): # 這裡假設你的 Slice 是這四個索引
+            self.edgepieces[pos].name = mp_names[mp_perm[i]]
+            self.edgepieces[pos].orientation = 0
+
+    def set_ep_mp(self, val):
+        ep_rank = val // 24
+        mp_rank = val % 24
+        
+        # 1. 處理上下層稜塊排列 (EP)
+        ep_perm = self.set_rank(ep_rank, 8)
+        ep_names = ["A","B","C","D","U","V","W","X"]
+        # 2. 處理中間層稜塊排列 (MP)
+        mp_perm = self.set_rank(mp_rank, 4)
+        mp_names = ["L","J","T","R"]
+
+        # 分配到對應位置 (這裡要對應你 newcube 的預設順序)
+        # 假設 0-3, 8-11 是上下層；4-7 是中間層
+        ud_indices = [0,1,2,3,8,9,10,11]
+        for i, pos in enumerate(ud_indices):
+            self.edgepieces[pos].name = ep_names[ep_perm[i]]
+        
+        for i, pos in enumerate([4,5,6,7]):
+            self.edgepieces[pos].name = mp_names[mp_perm[i]]
+
+    @staticmethod
+    def from_cp_mp_val(val):
+        c = Cube.newcube()
+        c.set_cp_mp(val)
+        return c
+
+    @staticmethod
+    def from_ep_mp_val(val):
+        c = Cube.newcube()
+        c.set_ep_mp(val)
+        return c
+
+    def get_cp_val(self):
+        # 8 個角塊的名字排列
+        names = [c.name for c in self.cornerpieces]
+        # 建立映射表將 A,B,C... 轉為 0,1,2...
+        mapping = {"A":0,"B":1,"C":2,"D":3,"U":4,"V":5,"W":6,"X":7}
+        perm = [mapping[n] for n in names]
+        return self.get_rank(perm)
+
+    def get_ep_val(self):
+        # 8 個上下層稜塊 (非 L,J,T,R) 的名字排列
+        target = ["A","B","C","D","U","V","W","X"]
+        perm = []
+        for e in self.edgepieces:
+            if e.name in target:
+                perm.append(target.index(e.name))
+        return self.get_rank(perm)
+
+    def get_mp_val(self):
+        # 4 個中間層稜塊 (L,J,T,R) 的內部排列
+        target = ["L","J","T","R"]
+        perm = []
+        for e in self.edgepieces:
+            if e.name in target:
+                perm.append(target.index(e.name))
+        return self.get_rank(perm)
+
+    def get_cp_mp_val(self):
+        return self.get_cp_val() * 24 + self.get_mp_val()
+
+    def get_ep_mp_val(self):
+        return self.get_ep_val() * 24 + self.get_mp_val()
 
     def copy(self):
         new_edges = [EdgePiece(e.name, e.orientation) for e in self.edgepieces]
@@ -82,3 +203,37 @@ class Cube:
     
     def get_twist_slice_val(self):
         return self.get_twist_number() + (self.get_slice_number()*(3**7))
+    
+    def set_flip(self, val):
+        parity = 0
+        for i in range(10, -1, -1):
+            ori = (val >> (10 - i)) & 1
+            self.edgepieces[i].orientation = ori
+            parity += ori
+        self.edgepieces[11].orientation = parity % 2
+
+    def set_twist(self, val):
+        lastc = 0
+        for i in range(6, -1, -1):
+            ori = val % 3
+            val //= 3
+            self.cornerpieces[i].orientation = ori
+            lastc += ori
+        self.cornerpieces[7].orientation = (3 - (lastc % 3)) % 3
+
+    def set_slice(self, val):
+        for e in self.edgepieces:
+            e.name = ""
+        k = 4
+        for i in range(11, -1, -1):
+            if val >= comb(i, k):
+                val -= comb(i, k)
+                self.edgepieces[i].name = ["L", "J", "T", "R"][k-1]
+                k -= 1
+            if k == 0: break
+        others = ["A", "B", "C", "D", "U", "V", "W", "X"]
+        idx = 0
+        for e in self.edgepieces:
+            if e.name == "":
+                e.name = others[idx]
+                idx += 1

@@ -11,29 +11,22 @@ class Phase1Solver:
         self.face_map = {'U':0, 'D':1, 'L':2, 'R':3, 'F':4, 'B':5}
         self.opposite_faces = {0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4}
 
-    def solve(self, cube, max_depth=20):
+    def solve(self, cube, max_depth=16):
         start_fs = cube.get_flip_slice_val()
         start_ts = cube.get_twist_slice_val()
         
         initial_h = max(self.tm.fs_table.get(start_fs), self.tm.ts_table.get(start_ts))
-        print(f"Initial Phase 1 Distance: {initial_h}")
         
         if initial_h == 0:
             print("Cube is already in DR state.")
             return ""
-
-        print("Searching for Phase 1 solution...")
-        start_time = time.time()
         
         for limit in range(initial_h, max_depth + 1):
             self.path = []
             if self._dfs(start_fs, start_ts, 0, limit, -10):
-                elapsed = time.time() - start_time
                 solution = self._format_path(self.path)
-                print(f"Found Solution at depth {limit} ({elapsed:.2f}s): {solution}")
+                print(f"Found Solution at depth {limit} : {solution}")
                 return solution
-            print(f"Depth {limit} finished...", end='\r')
-        
         print("No solution found.")
         return None
 

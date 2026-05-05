@@ -1,10 +1,32 @@
 import os
-from collections import deque
-from array import array
 import time
+import multiprocessing as mp
+from array import array
 from core.cube import Cube
 from core.Turns import CubeTurn
-from tables.distance_table import DistanceTable
+
+
+def _fs_worker(start, end, num_moves, moves_list):
+    local_table = array('i', [-1] * ((end - start) * num_moves))
+    for val in range(start, end):
+        cube = Cube.from_fs_val(val)
+        for m_idx, (face, amount) in enumerate(moves_list):
+            child_cube = cube.copy()
+            getattr(CubeTurn, f"{face}_Turn")(child_cube, amount)
+            child_val = child_cube.get_flip_slice_val()
+            local_table[(val - start) * num_moves + m_idx] = child_val
+    return local_table
+
+def _ts_worker(start, end, num_moves, moves_list):
+    local_table = array('i', [-1] * ((end - start) * num_moves))
+    for val in range(start, end):
+        cube = Cube.from_ts_val(val)
+        for m_idx, (face, amount) in enumerate(moves_list):
+            child_cube = cube.copy()
+            getattr(CubeTurn, f"{face}_Turn")(child_cube, amount)
+            child_val = child_cube.get_twist_slice_val()
+            local_table[(val - start) * num_moves + m_idx] = child_val
+    return local_table
 
 class MoveTableManager:
     def __init__(self, folder="tables"):
@@ -22,60 +44,65 @@ class MoveTableManager:
         ts_path = os.path.join(self.folder, "ts_move.bin")
 
         if os.path.exists(fs_path) and os.path.exists(ts_path):
-            print("Loading move tables from disk...")
+            print("\n--- Loading move tables from disk ---")
             fs_move = array('i')
             with open(fs_path, 'rb') as f:
                 fs_move.fromfile(f, self.FS_SIZE * self.num_moves)
             ts_move = array('i')
             with open(ts_path, 'rb') as f:
                 ts_move.fromfile(f, self.TS_SIZE * self.num_moves)
+            print("Tables loaded successfully.")
             return fs_move, ts_move
         else:
-            print("Move tables not found. Starting generation (this may take a few minutes)...")
-            
-            build_start = time.time()
-            
-            fs_move = self._build_move_table(self.FS_SIZE, "get_flip_slice_val")
+            print("\n--- Starting Move Table Generation---")
+            total_start = time.time()
+
+            # 1. Flip-Slice Table
+            print(f"\nBuilding Flip-Slice Table (Size: {self.FS_SIZE})...")
+            fs_start = time.time()
+            fs_move = self._generate_parallel(self.FS_SIZE, _fs_worker)
+            fs_end = time.time()
+            self._print_stats("Flip-Slice Table", fs_start, fs_end)
             self._save_move_table(fs_move, fs_path)
-            
-            ts_move = self._build_move_table(self.TS_SIZE, "get_twist_slice_val")
+
+            # 2. Twist-Slice Table
+            print(f"\nBuilding Twist-Slice Table (Size: {self.TS_SIZE})...")
+            ts_start = time.time()
+            ts_move = self._generate_parallel(self.TS_SIZE, _ts_worker)
+            ts_end = time.time()
+            self._print_stats("Twist-Slice Table", ts_start, ts_end)
             self._save_move_table(ts_move, ts_path)
 
-            build_end = time.time()
-            print(f"move tables built and saved in {build_end - build_start:.2f} seconds.")
+            total_end = time.time()
+            print(f"\n{'='*50}")
+            print(f"All tables completed in {total_end - total_start:.2f} seconds.")
+            print(f"{'='*50}")
             
             return fs_move, ts_move
 
-    def _build_move_table(self, size, val_func_name):
-        move_table = array('i', [-1] * (size * self.num_moves))
-        start_cube = Cube.newcube()
-        start_val = getattr(start_cube, val_func_name)()
-        
-        queue = deque([start_cube])
-        visited = DistanceTable(size)
-        visited.set(start_val, 1)
+    def _generate_parallel(self, total_size, worker_func):
+        cpu_count = mp.cpu_count()
+        chunk_size = total_size // cpu_count
+        tasks = []
 
-        count = 1
-        while queue:
-            curr_cube = queue.popleft()
-            curr_val = getattr(curr_cube, val_func_name)()
+        for i in range(cpu_count):
+            start = i * chunk_size
+            end = total_size if i == cpu_count - 1 else (i + 1) * chunk_size
+            tasks.append((start, end, self.num_moves, self.moves))
 
-            for move_idx, (face, amount) in enumerate(self.moves):
-                child_cube = curr_cube.copy()
-                getattr(CubeTurn, f"{face}_Turn")(child_cube, amount)
-                child_val = getattr(child_cube, val_func_name)()
-                
-                move_table[curr_val * self.num_moves + move_idx] = child_val
-                
-                if visited.get(child_val) == 255: # 255 means unvisited
-                    visited.set(child_val, 1)
-                    queue.append(child_cube)
-                    count += 1
-                    if count % 50000 == 0:
-                        print(f"Progress: {count}/{size} states explored...", end='\r')
-        
-        print(f"\nMove table built. Total unique states found: {count}")
-        return move_table
+        # 使用 mp.Pool 進行平行處理
+        with mp.Pool(processes=cpu_count) as pool:
+            results = pool.starmap(worker_func, tasks)
+
+        combined = array('i')
+        for res in results:
+            combined.extend(res)
+        return combined
+
+    def _print_stats(self, name, start_time, end_time):
+        duration = end_time - start_time
+        print(f"Finished {name}:")
+        print(f"  - Time taken: {duration:.2f} seconds")
 
     def _save_move_table(self, move_table, path):
         with open(path, 'wb') as f:

@@ -29,32 +29,48 @@ class TableManager:
         ts_path = os.path.join(self.folder, "ts_pruning.bin")
 
         if os.path.exists(fs_path) and os.path.exists(ts_path):
-            print("Loading pruning tables from disk...")
+            print("--- Loading pruning tables from disk ---")
             self.fs_table = DistanceTable.from_file(fs_path)
             self.ts_table = DistanceTable.from_file(ts_path)
+            print("Pruning tables loaded successfully.")
         else:
-            print("Pruning tables not found. Building with BFS...")
-            build_start = time.time()
+            print("--- Starting Pruning Table Generation ---")
+            total_start = time.time()
+            
+            # 保留你原始的起點定義邏輯
             start_cube = Cube.newcube()
             start_fs = start_cube.get_flip_slice_val()
             start_ts = start_cube.get_twist_slice_val()
 
+            # 1. Flip-Slice
+            print(f"\nBuilding Flip-Slice Pruning Table (Size: {self.FS_SIZE})...")
+            fs_start = time.time()
             self._build_pruning_table(self.fs_table, self.fs_move, start_fs, "Flip-Slice")
             self.fs_table.to_file(fs_path)
+            fs_end = time.time()
+            print(f"Finished.")
+            print(f"  - Time taken: {fs_end - fs_start:.2f} seconds")
             
+            # 2. Twist-Slice
+            print(f"\nBuilding Twist-Slice Pruning Table (Size: {self.TS_SIZE})...")
+            ts_start = time.time()
             self._build_pruning_table(self.ts_table, self.ts_move, start_ts, "Twist-Slice")
             self.ts_table.to_file(ts_path)
-            build_end = time.time()
-            print(f"Pruning tables built and saved in {build_end - build_start:.2f} seconds.")
-            print("Pruning tables built and saved successfully.")
+            ts_end = time.time()
+            print(f"Finished.")
+            print(f"  - Time taken: {ts_end - ts_start:.2f} seconds")
+
+            total_end = time.time()
+            print(f"\n{'='*50}")
+            print(f"Pruning tables built and saved in {total_end - total_start:.2f} seconds.")
+            print(f"{'='*50}")
 
     def _build_pruning_table(self, pruning_table, move_table, start_val, name):
-        """BFS to calculate real distance for each state"""
+        """完全保留你原本的 BFS 邏輯"""
         pruning_table.set(start_val, 0)
         queue = deque([start_val])
         visited_count = 1
         
-        print(f"Generating {name} pruning table...")
         while queue:
             curr_val = queue.popleft()
             curr_dist = pruning_table.get(curr_val)
@@ -67,10 +83,8 @@ class TableManager:
                     pruning_table.set(child_val, next_dist)
                     queue.append(child_val)
                     visited_count += 1
-                    if visited_count % 100000 == 0:
-                        print(f"Progress: {visited_count} states ranked...", end='\r')
-                    
-        print(f"\n{name} Table completed. Total states: {visited_count}")
+        
+        return visited_count
 
     def get_distance(self, cube):
         """Returns the real heuristic distance (0-12)"""
