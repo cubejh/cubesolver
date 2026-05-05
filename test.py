@@ -1,7 +1,7 @@
 import os
 import time
 from core.cube import Cube
-from core.notation import parse_moves 
+from core.notation import parse_moves, from_piece_def_init, from_piece_orient_init
 from tables.p1_table import TableManager
 from solver.phase1solver import Phase1Solver
 
@@ -15,11 +15,11 @@ def test_with_phase1solver(scramble):
         m.apply(cube)
     solver.solve(cube)
 
-    edge_string = "R1B1L0A1X0D1V1C1W0T0U0J0"
-    corner_string = "X0D0V0A2C2B1W1U0"
+    edge_string = "OCXLWKEHNPAB"
+    corner_string = "CLIXPRBT"
     print(f"edge_string: {edge_string}")
     print(f"corner_string: {corner_string}")
-    cube2 = Cube.from_stringA(edge_string, corner_string)
+    cube2 = from_piece_def_init(edge_string, corner_string)
     solver.solve(cube2)
 
 
@@ -56,4 +56,4 @@ def test_with_scramble():
 if __name__ == "__main__":
     test_with_scramble()
     print("===================")
-    test_with_phase1solver("R' U' F R' F' L2 D2 F L2 U2 F' U2 R2 B' D2 F U R' D L' B' D U' R' U' F")
+    test_with_phase1solver("R2 U' F2 D' U2 R2 U L2 B2 U L D' B U F' U' B' R2 B' F")
