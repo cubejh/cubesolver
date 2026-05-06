@@ -2,7 +2,7 @@ import os
 from collections import deque
 import time
 from core.cube import Cube
-from tables.move_table_manager import MoveTableManager
+from tables.move_table_manager_p1 import MoveTableManager
 from tables.distance_table import DistanceTable
 
 class TableManager:

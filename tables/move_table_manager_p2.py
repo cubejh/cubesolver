@@ -2,7 +2,7 @@ import os, time
 import multiprocessing as mp
 from array import array
 from core.cube import Cube
-from core.Turns import CubeTurn
+from core.turns import CubeTurn
 
 def _cp_mp_worker(start, end, num_moves, moves_list):
     local_table = array('i', [-1] * ((end - start) * num_moves))

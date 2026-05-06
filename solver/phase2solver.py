@@ -8,11 +8,9 @@ class Phase2Solver:
         self.opposite_faces = {0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4}
 
     def solve(self, cube, max_depth=18):
-        # 取得 Phase 2 的兩個關鍵座標
         start_cp_mp = cube.get_cp_mp_val()
         start_ep_mp = cube.get_ep_mp_val()
         
-        # --- 修正處：將 cp_table 改為 cp_mp_table，ep_table 改為 ep_mp_table ---
         initial_h = max(self.tm.cp_mp_table.get(start_cp_mp), 
                         self.tm.ep_mp_table.get(start_ep_mp))
         
@@ -28,7 +26,6 @@ class Phase2Solver:
         return None
 
     def _dfs(self, cp_mp, ep_mp, dist, limit, last_face_idx):
-        # --- 修正處：這裡也要改名字 ---
         h = max(self.tm.cp_mp_table.get(cp_mp), self.tm.ep_mp_table.get(ep_mp))
         
         if h == 0:
@@ -44,8 +41,6 @@ class Phase2Solver:
             if face_idx == self.opposite_faces.get(last_face_idx):
                 if face_idx < last_face_idx: continue
             
-            # --- 修正處：確認 Move Table 名字是否正確 ---
-            # 根據你 TableManagerP2 的定義，應該是 cp_mp_move 和 ep_mp_move
             next_cp_mp = self.tm.cp_mp_move[cp_mp * self.num_moves + m_idx]
             next_ep_mp = self.tm.ep_mp_move[ep_mp * self.num_moves + m_idx]
 

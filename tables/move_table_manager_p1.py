@@ -3,7 +3,7 @@ import time
 import multiprocessing as mp
 from array import array
 from core.cube import Cube
-from core.Turns import CubeTurn
+from core.turns import CubeTurn
 
 
 def _fs_worker(start, end, num_moves, moves_list):

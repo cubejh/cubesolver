@@ -21,12 +21,11 @@ class CubeSolver:
         print(f"Solver ready. Tables loaded in {time.time() - start_time:.2f}s\n")
 
     def solve(self, cube):
-        
         # Phase 1
         solution1 = self.solver1.solve(cube)
         if not solution1 and solution1 != "": 
-             print("Failed to find Phase 1 solution.")
-             return None
+            print("Failed to find Phase 1 solution.")
+            return None
         
         p1_moves = parse_moves(solution1)
         for m in p1_moves:
@@ -39,9 +38,8 @@ class CubeSolver:
             return None
 
         full_solution = f"{solution1} {solution2}".strip()
-        full_solution = self.simplify_moves(full_solution)
-        
-        
+        full_solution = self.simplify_moves(full_solution)   
+            
         print(f"Full Solution: {full_solution}")
         print(f"Steps: {len(full_solution.split())}")
         
@@ -64,6 +62,23 @@ class CubeSolver:
         """"""
         cube = from_piece_orient_init(edge_string, corner_string)
         return self.solve(cube)
+
+    def solve_scramble_p1(self, scramble):
+        print(f"Scramble: {scramble}")
+        cube = Cube.newcube()
+        for m in parse_moves(scramble):
+            m.apply(cube)
+        return self.solver1.solve(cube)
+    
+    def solve_piece_orientation_def_p1(self, edge_string, corner_string):
+        """"""
+        cube = from_piece_orient_init(edge_string, corner_string)
+        return self.solver1.solve(cube)
+    
+    def solve_piece_def_p1(self, edge_string, corner_string):
+        """"""
+        cube = from_piece_def_init(edge_string, corner_string)
+        return self.solver1.solve(cube)
 
     @staticmethod
     def simplify_moves(move_str):

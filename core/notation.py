@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from core.Turns import CubeTurn
+from core.turns import CubeTurn
 from core.cube import CornerPiece, EdgePiece, Cube
 import re
 
@@ -111,7 +111,7 @@ def from_piece_orient_init(edge_str, corner_str):
         raise ValueError(f"Illegal Corners: CO sum ({co_sum}) must be multiple of 3.")
     if (parity_analysis(edge_parity)+parity_analysis(corner_parity)) ==1:
          raise ValueError(f"Illegal State: Parity Test failed.")
-    print("Validation successful: Cube state is mathematically legal.")
+    print("Validation successful!")
     return Cube(new_edges, new_corners)
 
 def from_piece_def_init(edge_str, corner_str):
@@ -190,6 +190,6 @@ def from_piece_def_init(edge_str, corner_str):
         raise ValueError(f"Illegal Corners: CO sum ({co_sum}) must be multiple of 3.")
     if (parity_analysis(edge_parity)+parity_analysis(corner_parity)) ==1:
          raise ValueError(f"Illegal State: Parity Test failed.")
-    print("Validation successful: Cube state is mathematically legal.")
+    print("Validation successful!")
     return Cube(new_edges, new_corners)
 
